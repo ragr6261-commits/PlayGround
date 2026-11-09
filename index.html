@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#101513">
+<title>WALLBREAKER — A Titan Hunter's Trial</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700;800;900&family=DM+Mono:wght@400;500&display=swap');
+:root{color-scheme:dark;--cream:#e9e3d2;--rust:#cb6448;--gold:#ddbd75;--muted:#a9aa9d;--ink:#111714}
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#101513;color:var(--cream);font-family:'Barlow Condensed',Impact,sans-serif;touch-action:none}button{font:inherit;color:inherit}#game{position:relative;width:100%;height:100%;min-height:480px;background:#1a2220;overflow:hidden}canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+#vignette{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at 50% 45%,transparent 34%,rgba(7,11,10,.53) 100%);z-index:1}
+.hud{position:absolute;z-index:2;inset:0;padding:24px 30px;pointer-events:none;display:none}.hud.active{display:block}.brand{position:absolute;left:30px;top:24px;font-size:12px;letter-spacing:.28em;color:#d4cdb9;font-weight:700;opacity:.8}.brand b{color:var(--rust);font-size:15px}.mission{position:absolute;left:30px;top:54px}.eyebrow{font:10px 'DM Mono',monospace;letter-spacing:.22em;color:#d7b772;text-transform:uppercase}.mission-title{font-size:24px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;margin-top:3px}.hud-right{position:absolute;right:30px;top:24px;text-align:right}.wave{font-size:13px;letter-spacing:.2em;color:#d3d0c3}.wave strong{font-size:27px;color:var(--cream);display:block;letter-spacing:.04em}.stats{display:flex;gap:25px;justify-content:flex-end;margin-top:12px}.stat-label{font:9px 'DM Mono',monospace;letter-spacing:.16em;color:#a9aa9d}.stat-val{font-size:20px;font-weight:700;margin-top:2px}.fuel{position:absolute;left:30px;bottom:32px;width:190px}.bar-title{display:flex;justify-content:space-between;font:10px 'DM Mono',monospace;letter-spacing:.15em;margin-bottom:7px;color:#c7c4b8}.bar{height:5px;background:#444940;width:100%;position:relative}.bar i{display:block;height:100%;width:100%;background:#d5b86f;transition:width .15s}.titan-health{position:absolute;left:50%;top:30px;transform:translateX(-50%);width:min(300px,38vw);text-align:center;opacity:0;transition:opacity .2s}.titan-health.show{opacity:1}.titan-health .bar i{background:#bd674f}.titan-health .bar{background:#453b36}.objective{position:absolute;bottom:34px;right:30px;text-align:right;color:#c5c2b5;font-size:13px;letter-spacing:.06em}.objective strong{color:#e0bd72}.toast{position:absolute;left:50%;top:22%;transform:translate(-50%,-8px);font-size:14px;letter-spacing:.22em;color:#f0d28d;text-shadow:0 2px 12px #111;opacity:0;transition:.3s;text-transform:uppercase}.toast.show{opacity:1;transform:translate(-50%,0)}
+.overlay{position:absolute;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;background:linear-gradient(90deg,rgba(8,12,11,.74),rgba(8,12,11,.18) 68%,rgba(8,12,11,.24));transition:opacity .3s}.overlay.hidden{opacity:0;pointer-events:none}.panel{width:min(530px,calc(100vw - 42px));padding:36px 40px 32px;background:rgba(16,21,19,.83);border:1px solid rgba(226,211,172,.2);box-shadow:0 22px 70px #080c0bb3;position:relative;backdrop-filter:blur(8px)}.panel:before{content:'';position:absolute;left:-1px;top:32px;width:3px;height:80px;background:var(--rust)}.kicker{font:10px 'DM Mono',monospace;letter-spacing:.24em;color:#d2b776;text-transform:uppercase}.panel h1{font-size:clamp(47px,7vw,72px);line-height:.83;margin:15px 0 15px;letter-spacing:.015em;font-weight:900;text-transform:uppercase}.panel h1 span{display:block;color:#ce684d}.subline{font-size:16px;letter-spacing:.1em;color:#b8b7aa;text-transform:uppercase}.rule{height:1px;background:rgba(224,215,191,.18);margin:23px 0 19px}.brief{font-size:16px;line-height:1.45;color:#d3d0c3;max-width:400px}.brief strong{color:#e0bc73}.controls{display:grid;grid-template-columns:1fr 1fr;gap:10px 20px;margin-top:20px}.control{display:flex;align-items:center;gap:10px;color:#aaa99e;font-size:13px;letter-spacing:.05em}.key{min-width:28px;height:25px;padding:0 7px;display:grid;place-items:center;border:1px solid #6b6d62;color:#eee8d8;font:10px 'DM Mono',monospace;background:#252b27}.cta{width:100%;margin-top:27px;padding:14px 18px;border:0;background:#c76047;color:#fff4df;cursor:pointer;font-size:16px;letter-spacing:.17em;font-weight:800;text-transform:uppercase;transition:background .16s,transform .16s}.cta:hover{background:#df7355;transform:translateY(-1px)}.footnote{font:9px 'DM Mono',monospace;letter-spacing:.08em;color:#777a71;text-align:center;margin-top:15px}.result{font-size:17px;color:#c7c5b9;line-height:1.5}.result strong{color:#e0bd72}.small-actions{display:flex;gap:12px}.small-actions .cta{margin-top:18px}.ghost{background:transparent;border:1px solid #797b70}.ghost:hover{background:#272e29}
+.pause-hint{position:absolute;z-index:3;right:30px;bottom:31px;font:9px 'DM Mono',monospace;color:#aaa99e;letter-spacing:.12em;display:none}.pause-hint.show{display:block}
+.touch-ui{display:none;position:absolute;z-index:4;inset:0;pointer-events:none}.touch-btn{pointer-events:auto;position:absolute;border:1px solid #ded5be66;background:#161c19aa;color:#f0e5c7;border-radius:50%;display:grid;place-items:center;backdrop-filter:blur(4px);touch-action:none;user-select:none;-webkit-user-select:none}.touch-btn:active,.touch-btn.down{background:#c26048bb}.move-pad{position:absolute;left:18px;bottom:20px;display:flex;gap:10px}.move-pad .touch-btn{position:relative;width:58px;height:58px;font-size:20px}.action-pad{position:absolute;right:18px;bottom:20px;width:152px;height:130px}.action-pad .touch-btn{width:62px;height:62px;font:10px 'DM Mono',monospace;letter-spacing:.05em}.touch-grapple{right:74px;bottom:64px}.touch-slash{right:0;bottom:2px}.touch-boost{right:0;bottom:72px;width:48px!important;height:48px!important}.touch-pause{right:14px;top:14px;width:42px;height:42px;font-size:12px}
+@media (pointer:coarse),(max-width:700px){.touch-ui{display:block}.hud{padding:14px 16px}.brand{left:16px;top:14px;font-size:9px}.brand b{font-size:12px}.mission{left:16px;top:38px}.mission-title{font-size:17px}.eyebrow{font-size:8px}.hud-right{right:15px;top:14px}.wave{font-size:9px}.wave strong{font-size:20px}.stats{gap:12px;margin-top:7px}.stat-label{font-size:7px}.stat-val{font-size:15px}.fuel{left:16px;bottom:103px;width:120px}.bar-title{font-size:8px}.objective{right:16px;bottom:106px;font-size:10px}.titan-health{top:95px}.pause-hint{display:none!important}.panel{padding:27px 25px 22px}.panel h1{font-size:51px}.brief{font-size:14px}.controls{gap:8px 10px}.control{font-size:11px}.key{height:22px;min-width:25px}.footnote{font-size:8px}}
+@media (max-height:560px){.panel{padding:22px 30px}.panel h1{font-size:48px;margin:9px 0}.rule{margin:13px 0}.controls{margin-top:12px}.cta{margin-top:15px;padding:11px}.footnote{margin-top:8px}}
+</style>
+</head>
+<body>
+<main id="game" aria-label="Wallbreaker titan hunting game">
+<canvas id="scene"></canvas><div id="vignette"></div>
+<div class="hud" id="hud">
+  <div class="brand"><b>W</b> WALLBREAKER <span> / SCOUT REGIMENT</span></div>
+  <div class="mission"><div class="eyebrow">FIELD OPERATION 07</div><div class="mission-title">The outer district</div></div>
+  <div class="titan-health" id="titanHealth"><div class="bar-title"><span>ABNORMAL TITAN</span><span id="titanHpText">100%</span></div><div class="bar"><i id="titanHpBar"></i></div></div>
+  <div class="hud-right"><div class="wave">TARGETS NEUTRALIZED<strong><span id="kills">00</span> <small>/ 08</small></strong></div><div class="stats"><div><div class="stat-label">TIME</div><div class="stat-val" id="timeVal">00:00</div></div><div><div class="stat-label">SCORE</div><div class="stat-val" id="scoreVal">00000</div></div></div></div>
+  <div class="fuel"><div class="bar-title"><span>GAS RESERVE</span><span id="fuelText">100%</span></div><div class="bar"><i id="fuelBar"></i></div></div>
+  <div class="objective">REACH THE <strong>8 TITAN</strong> KILL TARGET</div>
+  <div class="toast" id="toast">PERFECT STRIKE</div>
+</div>
+<div class="pause-hint" id="pauseHint">[ ESC ] PAUSE</div>
+<div class="touch-ui" id="touchUi">
+  <button class="touch-btn touch-pause" data-act="pause">Ⅱ</button>
+  <div class="move-pad"><button class="touch-btn" data-act="left">◀</button><button class="touch-btn" data-act="right">▶</button></div>
+  <div class="action-pad"><button class="touch-btn touch-grapple" data-act="grapple">HOOK</button><button class="touch-btn touch-slash" data-act="slash">SLASH</button><button class="touch-btn touch-boost" data-act="boost">BOOST</button></div>
+</div>
+<div class="overlay" id="overlay"><section class="panel" id="panel"></section></div>
+</main>
+<script>
+(()=>{'use strict';
+const canvas=document.getElementById('scene'),ctx=canvas.getContext('2d');
+const $=id=>document.getElementById(id), hud=$('hud'), overlay=$('overlay'), panel=$('panel');
+let W=0,H=0,DPR=1,sceneT=0,last=0,mode='menu',toastTimer=0;
+const keys={left:false,right:false,grapple:false,boost:false,slash:false};
+const game={time:0,kills:0,score:0,fuel:100,player:null,titans:[],buildings:[],anchors:[],particles:[],clouds:[],camera:0,spawnTimer:1.8,slashCD:0,grappleCD:0,combo:0,comboTimer:0,shake:0};
+const rand=(a,b)=>a+Math.random()*(b-a), clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
+function resize(){DPR=Math.min(devicePixelRatio||1,2);W=canvas.clientWidth;H=canvas.clientHeight;canvas.width=Math.floor(W*DPR);canvas.height=Math.floor(H*DPR);ctx.setTransform(DPR,0,0,DPR,0,0);makeWorld();if(game.player){game.player.x=Math.min(game.player.x,game.camera+W*.7);game.player.y=Math.min(game.player.y,game.ground-18);}}
+window.addEventListener('resize',resize);
+function makeWorld(){
+ game.buildings=[];game.anchors=[];game.clouds=[];
+ const baseY=H*.79;let x=-100;
+ while(x<W+500){const bw=rand(90,190),bh=rand(H*.18,H*.44);game.buildings.push({x,w:bw,h:bh,seed:rand(0,100),tone:Math.floor(rand(0,4)),layer:rand(.6,1)});x+=bw+rand(14,32);}
+ for(let x=45;x<W+400;x+=rand(110,180)){game.anchors.push({x,y:rand(H*.15,H*.43),phase:rand(0,6)});}
+ for(let i=0;i<8;i++)game.clouds.push({x:rand(0,W),y:rand(H*.05,H*.4),s:rand(.6,1.5),speed:rand(2,7)});
+ game.ground=baseY;
+}
+function resetGame(){
+ game.time=0;game.kills=0;game.score=0;game.fuel=100;game.camera=0;game.spawnTimer=1.5;game.slashCD=0;game.grappleCD=0;game.combo=0;game.comboTimer=0;game.shake=0;game.particles=[];game.titans=[];
+ game.player={x:W*.24,y:H*.58,vx:0,vy:0,r:14,angle:0,rope:null,trail:[],invuln:0};
+ for(let i=0;i<3;i++)spawnTitan(W*(.68+i*.35),i===0?1:rand(.7,1.25));
+}
+function spawnTitan(x,scale=1){game.titans.push({x,y:game.ground,w:58*scale,h:144*scale,hp:1,scale,phase:rand(0,6),speed:rand(15,31),alive:true,hitFlash:0,walk:rand(0,6),type:Math.random()<.25?'large':'normal'});}
+function worldX(x){return x-game.camera;}
+function drawSky(){
+ const g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,'#82918d');g.addColorStop(.52,'#b9b7a5');g.addColorStop(1,'#d0bea0');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+ // soft late-day sun
+ const sun=ctx.createRadialGradient(W*.76,H*.22,4,W*.76,H*.22,H*.29);sun.addColorStop(0,'rgba(249,221,166,.42)');sun.addColorStop(1,'rgba(249,221,166,0)');ctx.fillStyle=sun;ctx.fillRect(0,0,W,H);
+ for(const c of game.clouds){const x=(c.x-sceneT*c.speed*.3)%(W+220);const px=x< -100?x+W+220:x;ctx.fillStyle='rgba(235,228,207,.12)';ctx.beginPath();ctx.ellipse(px,c.y,70*c.s,13*c.s,0,0,Math.PI*2);ctx.ellipse(px+34*c.s,c.y-4*c.s,35*c.s,18*c.s,0,0,Math.PI*2);ctx.fill();}
+ // distant wall and hills
+ ctx.fillStyle='#748079';ctx.beginPath();ctx.moveTo(0,H*.68);for(let x=0;x<=W;x+=40)ctx.lineTo(x,H*.58+Math.sin((x+sceneT*3)*.008)*18);ctx.lineTo(W,H*.8);ctx.lineTo(0,H*.8);ctx.fill();
+ ctx.fillStyle='#b8ad94';ctx.fillRect(0,H*.68,W,H*.035);ctx.fillStyle='#8c897b';for(let x=0;x<W;x+=22){ctx.fillRect(x,H*.65,2,H*.035);}
+}
+function drawBuildings(){
+ const base=game.ground;
+ game.buildings.forEach((b,i)=>{const shift=game.camera*b.layer*.42;let x=((b.x-shift+W*2)%(W+450))-170;const y=base-b.h;
+ const colors=['#66685d','#737064','#5d645e','#777268'];ctx.fillStyle=colors[b.tone];ctx.fillRect(x,y,b.w,b.h);
+ ctx.fillStyle='rgba(35,42,38,.44)';ctx.fillRect(x,y,b.w,8);ctx.fillStyle='rgba(25,31,29,.28)';ctx.fillRect(x+b.w-7,y,7,b.h);
+ // sloped roof / gables
+ ctx.fillStyle=['#514e45','#5d5548','#4b514c'][b.tone%3];ctx.beginPath();ctx.moveTo(x-5,y);ctx.lineTo(x+b.w*.48,y-(15+b.seed%16));ctx.lineTo(x+b.w+5,y);ctx.fill();
+ const cols=Math.max(2,Math.floor(b.w/25)),rows=Math.floor(b.h/31);for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){let wx=x+12+c*(b.w-24)/cols,wy=y+18+r*29;const lit=((Math.floor(wx/20)+r*7+i)%9===0);ctx.fillStyle=lit?'rgba(220,184,111,.5)':'rgba(28,38,34,.46)';ctx.fillRect(wx,wy,7,10);}
+ // anchor points glow
+ if(i%2===0){const ax=x+b.w*.52,ay=y-16;ctx.fillStyle='rgba(225,200,138,.56)';ctx.beginPath();ctx.arc(ax,ay,3,0,Math.PI*2);ctx.fill();}
+ });
+ // ground road
+ ctx.fillStyle='#55574f';ctx.fillRect(0,base,W,H-base);ctx.fillStyle='#a3967e';ctx.fillRect(0,base,W,3);
+ ctx.fillStyle='rgba(220,210,185,.14)';for(let x=0;x<W;x+=100)ctx.fillRect(x-game.camera%100,base+42,48,2);
+}
+function drawAnchors(){for(const a of game.anchors){let x=worldX(a.x);if(x<-20||x>W+20)continue;const pulse=1+Math.sin(sceneT*3+a.phase)*.18;ctx.strokeStyle='rgba(224,195,129,.45)';ctx.lineWidth=1;ctx.beginPath();ctx.arc(x,a.y,7*pulse,0,Math.PI*2);ctx.stroke();ctx.fillStyle='#e2c481';ctx.beginPath();ctx.arc(x,a.y,2.2,0,Math.PI*2);ctx.fill();}}
+function drawTitan(t){if(!t.alive)return;const x=worldX(t.x),y=t.y,sc=t.scale;const sway=Math.sin(t.walk)*4*sc;ctx.save();ctx.translate(x,y);ctx.scale(sc,sc);
+ // shadow
+ ctx.fillStyle='rgba(20,25,22,.24)';ctx.beginPath();ctx.ellipse(0,0,38,8,0,0,Math.PI*2);ctx.fill();
+ let skin=t.hitFlash>0?'#ead0bd':'#ba9b80',shade='#806d5d',line='#554b44';
+ // legs stride
+ const step=Math.sin(t.walk)*8;ctx.lineCap='round';ctx.lineJoin='round';ctx.strokeStyle=shade;ctx.lineWidth=15;ctx.beginPath();ctx.moveTo(-12,-47);ctx.lineTo(-14-step,-22);ctx.lineTo(-18-step,-3);ctx.moveTo(12,-47);ctx.lineTo(15+step,-22);ctx.lineTo(18+step,-3);ctx.stroke();
+ ctx.fillStyle=skin;ctx.beginPath();ctx.ellipse(0,-82,23,37,0,0,Math.PI*2);ctx.fill();ctx.strokeStyle=line;ctx.lineWidth=1.5;ctx.stroke();
+ // arms
+ ctx.strokeStyle=skin;ctx.lineWidth=11;ctx.beginPath();ctx.moveTo(-17,-104);ctx.lineTo(-29-sway,-82);ctx.lineTo(-32-sway,-60);ctx.moveTo(17,-104);ctx.lineTo(29+sway,-82);ctx.lineTo(31+sway,-62);ctx.stroke();
+ // head
+ ctx.fillStyle=skin;ctx.beginPath();ctx.ellipse(0,-133,16,19,0,0,Math.PI*2);ctx.fill();ctx.strokeStyle=line;ctx.lineWidth=1.3;ctx.stroke();
+ // hair ridge, face
+ ctx.fillStyle='#51493e';ctx.beginPath();ctx.moveTo(-15,-139);ctx.quadraticCurveTo(-10,-160,4,-153);ctx.quadraticCurveTo(14,-151,15,-139);ctx.lineTo(8,-143);ctx.lineTo(1,-137);ctx.lineTo(-8,-142);ctx.fill();
+ ctx.fillStyle='#302c28';ctx.fillRect(-9,-135,4,2);ctx.fillRect(5,-135,4,2);ctx.strokeStyle='#71574c';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(-4,-126);ctx.lineTo(3,-124);ctx.stroke();
+ // nape weak point marker
+ ctx.fillStyle='rgba(214,92,66,.85)';ctx.beginPath();ctx.ellipse(-7,-110,5,8,-.4,0,Math.PI*2);ctx.fill();ctx.fillStyle='#f0cf88';ctx.beginPath();ctx.arc(-7,-110,2,0,Math.PI*2);ctx.fill();
+ if(t.hitFlash>0){ctx.strokeStyle='rgba(255,235,199,.8)';ctx.lineWidth=3;ctx.beginPath();ctx.arc(0,-88,36,0,Math.PI*2);ctx.stroke();}
+ ctx.restore();}
+function drawPlayer(){const p=game.player;if(!p)return;const x=worldX(p.x),y=p.y;ctx.save();ctx.translate(x,y);ctx.rotate(p.angle*.35);
+ // cloak trailing in motion
+ ctx.fillStyle='#74846f';ctx.beginPath();ctx.moveTo(-2,-30);ctx.quadraticCurveTo(-17,-18,-21,-1);ctx.lineTo(-2,-7);ctx.lineTo(7,-24);ctx.fill();
+ // legs, harness body
+ ctx.strokeStyle='#c9c0a9';ctx.lineWidth=6;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(-4,-13);ctx.lineTo(-7,0);ctx.moveTo(4,-13);ctx.lineTo(8,0);ctx.stroke();
+ ctx.fillStyle='#d5c9ad';ctx.fillRect(-6,-29,12,17);ctx.fillStyle='#5e716b';ctx.fillRect(-5,-28,10,9);ctx.fillStyle='#a6865c';ctx.fillRect(-9,-17,18,4);
+ // harness lines
+ ctx.strokeStyle='#b9aa89';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(-5,-27);ctx.lineTo(0,-14);ctx.lineTo(6,-27);ctx.stroke();
+ // head and scarf
+ ctx.fillStyle='#c49c7a';ctx.beginPath();ctx.arc(0,-36,6.2,0,Math.PI*2);ctx.fill();ctx.fillStyle='#52473b';ctx.beginPath();ctx.arc(0,-38,6,Math.PI,Math.PI*2);ctx.fill();ctx.fillStyle='#a44f3c';ctx.fillRect(-5,-31,10,3);
+ // blades
+ ctx.strokeStyle='#d8d6c9';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(-8,-18);ctx.lineTo(-16,-32);ctx.moveTo(8,-18);ctx.lineTo(16,-32);ctx.stroke();
+ if(p.rope){const a=p.rope;ctx.setTransform(DPR,0,0,DPR,0,0);ctx.strokeStyle='rgba(225,219,196,.8)';ctx.lineWidth=1.3;ctx.beginPath();ctx.moveTo(worldX(p.x),p.y-25);ctx.lineTo(worldX(a.x),a.y);ctx.stroke();ctx.fillStyle='#e2c481';ctx.beginPath();ctx.arc(worldX(a.x),a.y,3,0,Math.PI*2);ctx.fill();}
+ ctx.restore();
+ // speed streaks
+ if(keys.boost&&game.fuel>0){for(let i=0;i<3;i++){ctx.strokeStyle=`rgba(231,214,177,${.35-i*.08})`;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(x-rand(20,65),y-rand(-4,15));ctx.lineTo(x-rand(10,30),y-rand(-4,15));ctx.stroke();}}
+}
+function drawParticles(dt){for(let i=game.particles.length-1;i>=0;i--){const p=game.particles[i];p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=p.gravity*dt;p.life-=dt;if(p.life<=0){game.particles.splice(i,1);continue;}ctx.globalAlpha=clamp(p.life/p.max,0,1);ctx.fillStyle=p.color;ctx.beginPath();ctx.arc(worldX(p.x),p.y,p.size,0,Math.PI*2);ctx.fill();}ctx.globalAlpha=1;}
+function addBurst(x,y,color,n=18){for(let i=0;i<n;i++){const a=rand(0,Math.PI*2),speed=rand(35,210);game.particles.push({x,y,vx:Math.cos(a)*speed,vy:Math.sin(a)*speed-35,gravity:150,life:rand(.35,.8),max:.8,size:rand(1,4),color});}}
+function render(dt){
+ ctx.save();if(game.shake>0){ctx.translate(rand(-game.shake,game.shake),rand(-game.shake*.5,game.shake*.5));game.shake=Math.max(0,game.shake-dt*20);}drawSky();drawBuildings();drawAnchors();
+ // titans sorted by world location for depth
+ game.titans.slice().sort((a,b)=>a.y-b.y).forEach(drawTitan);drawPlayer();drawParticles(dt);
+ if(game.player&&game.player.rope){const p=game.player,a=p.rope;const dx=worldX(a.x)-worldX(p.x),dy=a.y-(p.y-25),ang=Math.atan2(dy,dx);ctx.strokeStyle='rgba(224,195,129,.45)';ctx.lineWidth=1;ctx.beginPath();ctx.arc(worldX(a.x),a.y,16,ang-.22,ang+.22);ctx.stroke();}
+ ctx.restore();
+}
+function nearestAnchor(){const p=game.player;let best=null,dist=Infinity;for(const a of game.anchors){const d=Math.hypot(a.x-p.x,a.y-(p.y-25));if(d<dist&&d<430){best=a;dist=d;}}return best;}
+function attachGrapple(){const p=game.player;if(!p||game.grappleCD>0)return;if(p.rope){p.rope=null;return;}const a=nearestAnchor();if(a){p.rope=a;game.grappleCD=.24;game.fuel=Math.max(0,game.fuel-1);toast('ANCHOR LOCKED');}}
+function attack(){const p=game.player;if(!p||game.slashCD>0)return;game.slashCD=.42;let target=null,best=Infinity;
+ for(const t of game.titans){if(!t.alive)continue;const dx=t.x-p.x,dy=(t.y-110*t.scale)-p.y,d=Math.hypot(dx,dy);if(Math.abs(dx)<100*t.scale&&Math.abs(dy)<132*t.scale&&d<best){best=d;target=t;}}
+ if(target){target.hp-=1;target.hitFlash=.22;game.shake=5;game.score+=100+game.combo*25;game.combo++;game.comboTimer=2.2;addBurst(target.x-7,target.y-110*target.scale,'#e99c70',23);addBurst(target.x,target.y-95*target.scale,'#efe0b9',12);toast(game.combo>1?`CLEAN CUT  ×${game.combo}`:'PERFECT STRIKE');if(target.hp<=0){target.alive=false;game.kills++;game.score+=350;game.fuel=Math.min(100,game.fuel+13);addBurst(target.x,target.y-75*target.scale,'#d7c497',34);if(game.kills>=8){finish(true);}else{game.spawnTimer=1.1;}}}
+ else {p.vx+=p.vx>=0?100:-100;}
+}
+function update(dt){sceneT+=dt;if(mode!=='playing')return;game.time+=dt;game.slashCD=Math.max(0,game.slashCD-dt);game.grappleCD=Math.max(0,game.grappleCD-dt);game.comboTimer-=dt;if(game.comboTimer<=0)game.combo=0;
+ const p=game.player,ground=game.ground-18;let accel=keys.boost?670:370;
+ if(keys.left)p.vx-=accel*dt;if(keys.right)p.vx+=accel*dt;
+ if(keys.boost&&game.fuel>0){game.fuel=Math.max(0,game.fuel-21*dt);p.vx*=1+dt*1.35;p.vy-=70*dt;}else game.fuel=Math.min(100,game.fuel+5.5*dt);
+ if(p.rope){const a=p.rope,dx=a.x-p.x,dy=a.y-(p.y-20),dist=Math.hypot(dx,dy)||1;const tension=(dist-135);p.vx+=(dx/dist)*tension*1.25*dt;p.vy+=(dy/dist)*tension*1.25*dt;p.vy+=235*dt;if(!keys.grapple&&dist<115){p.rope=null;}if(dist>510){p.rope=null;}}
+ else {p.vy+=620*dt;}
+ p.vx*=Math.pow(.984,dt*60);p.vy*=Math.pow(.992,dt*60);p.x+=p.vx*dt;p.y+=p.vy*dt;
+ if(p.y>ground){p.y=ground;p.vy=Math.min(0,p.vy);p.rope=null;}
+ if(p.y<H*.12){p.y=H*.12;p.vy=Math.max(0,p.vy);}
+ p.x=Math.max(20,p.x);p.angle=clamp(p.vx/550,-1,1);
+ if(keys.grapple&&!p.rope&&game.grappleCD<=0)attachGrapple();
+ game.camera=Math.max(0,p.x-W*.36);const farAnchor=game.anchors.reduce((max,a)=>Math.max(max,a.x),0);if(farAnchor<p.x+W*1.6){for(let x=farAnchor+rand(100,160);x<p.x+W*2.2;x+=rand(125,190))game.anchors.push({x,y:rand(H*.15,H*.43),phase:rand(0,6)});}
+ // advance scenery and target wave
+ for(const t of game.titans){if(!t.alive)continue;t.walk+=dt*2.7;t.x-=t.speed*dt;t.hitFlash=Math.max(0,t.hitFlash-dt);
+  if(Math.abs(t.x-p.x)<58&&Math.abs(t.y-p.y)<120){p.vx+=(p.x<t.x?-1:1)*140*dt;game.fuel=Math.max(0,game.fuel-9*dt);}
+  if(t.x<game.camera-90){t.alive=false;game.spawnTimer=Math.min(game.spawnTimer,.2);game.score=Math.max(0,game.score-100);toast('TITAN BREACHED THE LINE');}
+ }
+ game.titans=game.titans.filter(t=>t.alive||t.x>game.camera-200);
+ game.spawnTimer-=dt;if(game.spawnTimer<=0&&game.kills<8){const last=Math.max(game.camera+W*.9,...game.titans.map(t=>t.x));spawnTitan(last+rand(W*.45,W*.75),rand(.8,1.3));game.spawnTimer=rand(2,3.8);}
+ if(game.fuel<=0&&p.y>ground-10)p.vx*=.99;
+ if(game.time>100){finish(false,'The district has fallen.');}
+ updateHud();
+}
+function updateHud(){ $('kills').textContent=String(game.kills).padStart(2,'0');$('scoreVal').textContent=String(game.score).padStart(5,'0');const sec=Math.floor(game.time);$('timeVal').textContent=`${String(Math.floor(sec/60)).padStart(2,'0')}:${String(sec%60).padStart(2,'0')}`;$('fuelText').textContent=`${Math.round(game.fuel)}%`;$('fuelBar').style.width=`${game.fuel}%`;
+ const target=game.titans.find(t=>t.alive&&Math.abs(t.x-game.player.x)<340);$('titanHealth').classList.toggle('show',!!target);if(target){$('titanHpBar').style.width=`${target.hp*100}%`;$('titanHpText').textContent=target.hp?'100%':'0%';}}
+function toast(text){const el=$('toast');el.textContent=text;el.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),1050);}
+function showPanel(kind,detail=''){overlay.classList.remove('hidden');if(kind==='menu'){panel.innerHTML=`<div class="kicker">THE SCOUT REGIMENT · FIELD TRIAL</div><h1>WALL<span>BREAKER</span></h1><div class="subline">A Titan Hunter's Trial</div><div class="rule"></div><div class="brief">The district is overrun. Swing between rooftops, close the distance, and strike the <strong>glowing nape</strong>. Take down eight Titans before the line breaks.</div><div class="controls"><div class="control"><span class="key">A / D</span> Move through the air</div><div class="control"><span class="key">SPACE</span> Grapple / release</div><div class="control"><span class="key">SHIFT</span> Gas boost</div><div class="control"><span class="key">J</span> Blade strike</div></div><button class="cta" id="startBtn">ENTER THE DISTRICT <span>→</span></button><div class="footnote">A / D MOVE · ESC TO PAUSE</div>`;}
+ else if(kind==='pause'){panel.innerHTML=`<div class="kicker">FIELD TRIAL · PAUSED</div><h1>TAKE A<br><span>BREATH.</span></h1><div class="brief">The Titans aren't going anywhere. Your gas reserves are.</div><button class="cta" id="resumeBtn">RESUME MISSION</button><button class="cta ghost" id="restartBtn">RESTART TRIAL</button>`;}
+ else{const won=kind==='win';panel.innerHTML=`<div class="kicker">${won?'FIELD TRIAL COMPLETE':'MISSION ENDED'}</div><h1>${won?'HUMANITY':'THE WALL'}<span>${won?'ENDURES':'FELL.'}</span></h1><div class="rule"></div><div class="result">${detail|| (won?'Eight Titans neutralized. The district is secure—for now.':'You neutralized '+game.kills+' of 8 Titans.') }<br><br><strong>FINAL SCORE&nbsp; ${String(game.score).padStart(5,'0')}</strong></div><button class="cta" id="restartBtn">${won?'HUNT AGAIN':'TRY AGAIN'} <span>→</span></button>`;}
+ const start=$('startBtn');if(start)start.onclick=startGame;const resume=$('resumeBtn');if(resume)resume.onclick=()=>{mode='playing';overlay.classList.add('hidden');};const restart=$('restartBtn');if(restart)restart.onclick=startGame;}
+function startGame(){resetGame();mode='playing';hud.classList.add('active');$('pauseHint').classList.add('show');overlay.classList.add('hidden');}
+function finish(won,msg=''){mode='over';$('pauseHint').classList.remove('show');showPanel(won?'win':'lose',msg);}
+function pause(){if(mode==='playing'){mode='pause';showPanel('pause');}}
+window.addEventListener('keydown',e=>{const k=e.key.toLowerCase();if([' ','arrowleft','arrowright','arrowup','arrowdown'].includes(k))e.preventDefault();if(k==='escape'||k==='p'){if(mode==='playing')pause();else if(mode==='pause'){mode='playing';overlay.classList.add('hidden');}return;}if(mode!=='playing')return;
+ if(k==='a'||k==='arrowleft')keys.left=true;if(k==='d'||k==='arrowright')keys.right=true;if(k==='shift'||k==='w'||k==='arrowup')keys.boost=true;if(k===' '){keys.grapple=true;}if(k==='j'||k==='enter')attack();});
+window.addEventListener('keyup',e=>{const k=e.key.toLowerCase();if(k==='a'||k==='arrowleft')keys.left=false;if(k==='d'||k==='arrowright')keys.right=false;if(k==='shift'||k==='w'||k==='arrowup')keys.boost=false;if(k===' ')keys.grapple=false;});
+$('touchUi').querySelectorAll('[data-act]').forEach(btn=>{const action=btn.dataset.act;const down=e=>{e.preventDefault();btn.classList.add('down');if(action==='pause'){pause();return;}if(action==='slash'){attack();return;}keys[action]=true;};const up=e=>{e.preventDefault();btn.classList.remove('down');if(action!=='pause'&&action!=='slash')keys[action]=false;};btn.addEventListener('pointerdown',down);btn.addEventListener('pointerup',up);btn.addEventListener('pointercancel',up);btn.addEventListener('lostpointercapture',up);});
+function frame(now){const dt=Math.min(.033,(now-last)/1000||0);last=now;update(dt);render(dt);requestAnimationFrame(frame);}
+resize();showPanel('menu');requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
